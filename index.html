@@ -19,13 +19,11 @@
             text-align: center;
         }
         
-        h1 { color: #d32f2f; margin-bottom: 30px; font-size: 2.5rem; transition: 0.3s; }
+        /* Main UI */
+        #main-card { transition: opacity 0.5s ease; }
+        h1 { color: #d32f2f; margin-bottom: 30px; font-size: 2.5rem; }
 
-        .container { 
-            position: relative; 
-            width: 100%; 
-            height: 100px; 
-        }
+        .container { position: relative; width: 100%; height: 100px; }
 
         button {
             padding: 15px 30px;
@@ -38,12 +36,7 @@
             transition: transform 0.1s ease;
         }
 
-        #yesBtn { 
-            background-color: #4caf50; 
-            color: white; 
-            z-index: 10;
-        }
-        
+        #yesBtn { background-color: #4caf50; color: white; z-index: 10; }
         #noBtn {
             background-color: #f44336;
             color: white;
@@ -53,31 +46,45 @@
             touch-action: none; 
             z-index: 5;
         }
+
+        /* Success Page - Hidden by default */
+        #success-page {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .heart-icon { font-size: 100px; color: #d32f2f; margin-bottom: 20px; }
+        .success-message { font-size: 2rem; color: #d32f2f; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <h1 id="question">Will you be my Valentine? ❤️</h1>
-    
-    <div class="container">
-        <button id="yesBtn" onclick="celebrate()">Yes</button>
-        <button id="noBtn">No</button>
+    <div id="main-card">
+        <h1 id="question">Will you be my Valentine? ❤️</h1>
+        <div class="container">
+            <button id="yesBtn" onclick="celebrate()">Yes</button>
+            <button id="noBtn">No</button>
+        </div>
     </div>
+
+    <div id="success-page">
+        <div class="heart-icon">💖</div>
+        <div class="success-message">Yay! It's a Date!</div>
+        <p style="font-size: 1.2rem; color: #555;">I can't wait to spend it with you. 🥰</p>
+        </div>
 
     <script>
         const noBtn = document.getElementById('noBtn');
         const yesBtn = document.getElementById('yesBtn');
-        const question = document.getElementById('question');
+        const mainCard = document.getElementById('main-card');
+        const successPage = document.getElementById('success-page');
 
-        // This makes the "No" button dodge the cursor/finger
         const handleEscape = () => {
-            const btnWidth = noBtn.offsetWidth;
-            const btnHeight = noBtn.offsetHeight;
-
-            // Ensures it stays within the screen boundaries
-            const maxX = window.innerWidth - btnWidth;
-            const maxY = window.innerHeight - btnHeight;
-
+            const maxX = window.innerWidth - noBtn.offsetWidth;
+            const maxY = window.innerHeight - noBtn.offsetHeight;
             const randomX = Math.floor(Math.random() * maxX);
             const randomY = Math.floor(Math.random() * maxY);
 
@@ -87,48 +94,50 @@
         };
 
         function celebrate() {
-            question.innerText = "YAY! I knew you'd say yes! 💖";
-            noBtn.style.display = 'none';
-            yesBtn.style.transform = "scale(1.5)";
+            // Hide the main card
+            mainCard.style.opacity = '0';
+            
+            setTimeout(() => {
+                mainCard.style.display = 'none';
+                
+                // Show the success page
+                successPage.style.display = 'flex';
+                setTimeout(() => {
+                    successPage.style.opacity = '1';
+                }, 50);
 
-            // Confetti Explosion!
-            const duration = 5 * 1000;
+                // Launch Confetti
+                launchConfetti();
+            }, 500);
+        }
+
+        function launchConfetti() {
+            const duration = 10 * 1000;
             const animationEnd = Date.now() + duration;
             const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
 
-            function randomInRange(min, max) {
-              return Math.random() * (max - min) + min;
-            }
+            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             const interval = setInterval(function() {
-              const timeLeft = animationEnd - Date.now();
+                const timeLeft = animationEnd - Date.now();
+                if (timeLeft <= 0) return clearInterval(interval);
 
-              if (timeLeft <= 0) {
-                return clearInterval(interval);
-              }
-
-              const particleCount = 50 * (timeLeft / duration);
-              
-              // Pink and Red hearts/confetti
-              confetti(Object.assign({}, defaults, { 
-                particleCount, 
-                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-                colors: ['#ff0000', '#ff69b4', '#ff1493']
-              }));
-              confetti(Object.assign({}, defaults, { 
-                particleCount, 
-                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-                colors: ['#ff0000', '#ff69b4', '#ff1493']
-              }));
+                const particleCount = 50 * (timeLeft / duration);
+                confetti(Object.assign({}, defaults, { 
+                    particleCount, 
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+                    colors: ['#ff0000', '#ff69b4']
+                }));
+                confetti(Object.assign({}, defaults, { 
+                    particleCount, 
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+                    colors: ['#ff0000', '#ff69b4']
+                }));
             }, 250);
         }
 
-        // Event listeners for the runaway button
         noBtn.addEventListener('mouseover', handleEscape);
-        noBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault(); 
-            handleEscape();
-        });
+        noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); handleEscape(); });
         noBtn.addEventListener('click', handleEscape);
     </script>
 </body>
